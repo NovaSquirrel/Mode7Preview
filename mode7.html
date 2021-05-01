@@ -9,6 +9,7 @@
 <canvas id="tilemapCanvas" width="1024" height="1024" style="display:none;"></canvas>
 <textarea spellcheck="false" id="code" rows="20" cols="80" oninput="if(document.getElementById('rerenderLive').checked) rerender();">// Enter code in here
 // Use the variable "scanline" to get the current scanline
+// Use the variable "framecount" to get a frame count, if animation is on
 // Use the function toFixed(n) to convert a floating point number
 m7a = 0x0100;
 m7b = 0x0000;
@@ -24,9 +25,12 @@ return [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs];
 No errors?
 <input type="checkbox" id="sourceValid" name="sourceValid" disabled>
 -
-<input type="button" value="Redraw" onclick="rerender()">
+<input type="button" value="Redraw" onclick="rerenderButton()">
 <label for="rerenderLive">Auto redraw:</label>
 <input type="checkbox" id="rerenderLive" name="rerenderLive" checked>
+<label>
+Do animation:<input type="checkbox" id="doAnimation" name="doAnimation" onclick="animationToggled(this);">
+</label>
 <br>
 <canvas id="screen" width="256" height="224" style="border:1px solid #000000;"></canvas>
 <br>

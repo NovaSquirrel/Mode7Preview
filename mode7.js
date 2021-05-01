@@ -1,11 +1,5 @@
-m7a = 0;
-m7b = 0;
-m7c = 0;
-m7d = 0;
-m7x = 0;
-m7y = 0;
-m7hofs = 0;
-m7vofs = 0;
+let framecount = 0;
+let animationEnabled = false;
 
 function clip(val) { return (val & 0x2000) ? (val | ~0x3ff) : (val & 0x3ff); }
 function toFixed(f) { return Math.round(f*256) & 0xffff};
@@ -21,10 +15,11 @@ function rerender() {
 	// Get the function ready to be called
 	let scanlineFunction;
 	try {
-		scanlineFunction = Function("scanline", sourceCode);
+		scanlineFunction = Function("scanline", "framecount", sourceCode);
 		sourceValidSignal.checked = true;
 		document.getElementById('errorText').textContent = '';
 	} catch(err) {
+		lastRunFailed = true;
 		sourceValidSignal.checked = false;
 		console.log(err);
 		document.getElementById('errorText').textContent = err;
@@ -41,7 +36,7 @@ function rerender() {
 	for(let drawY=0; drawY<224; drawY++) {
 		// Mode 7 registers
 		try {
-			let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY);
+			let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount);
 		} catch(err) {
 			sourceValidSignal.checked = false;
 			console.log(err);
@@ -86,6 +81,33 @@ function rerender() {
 	}
 
 	ctx.putImageData(outImage, 0, 0);
+	if(animationEnabled) {
+		window.requestAnimationFrame(animationStep);
+	}
+}
+
+function rerenderButton() {
+	rerender();
+	framecount = 0;
+}
+
+let animationStart;
+function animationStep(timestamp) {
+	if(animationStart == undefined) {
+		animationStart = timestamp;
+	}
+	framecount = Math.floor((timestamp - animationStart)/(16.0+2.0/3.0));
+	if(animationEnabled) {
+		rerender();
+	}
+}
+
+function animationToggled(cb) {
+	animationEnabled = cb.checked;
+	if(animationEnabled) {
+		animationStart = undefined;
+		rerender();
+	}
 }
 
 function loaded() {
