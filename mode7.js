@@ -1,5 +1,6 @@
 let framecount = 0;
 let animationEnabled = false;
+let animationWaiting = false;
 
 function clip(val) { return (val & 0x2000) ? (val | ~0x3ff) : (val & 0x3ff); }
 function toFixed(f) { return Math.round(f*256) & 0xffff};
@@ -92,8 +93,9 @@ function rerender() {
 	}
 
 	ctx.putImageData(outImage, 0, 0);
-	if(animationEnabled) {
+	if(animationEnabled && !animationWaiting) {
 		window.requestAnimationFrame(animationStep);
+		animationWaiting = true;
 	}
 }
 
@@ -104,6 +106,7 @@ function rerenderButton() {
 
 let animationStart;
 function animationStep(timestamp) {
+	animationWaiting = false;
 	if(animationStart == undefined) {
 		animationStart = timestamp;
 	}
@@ -118,6 +121,8 @@ function animationToggled(cb) {
 	if(animationEnabled) {
 		animationStart = undefined;
 		rerender();
+	} else {
+		animationWaiting = false;
 	}
 }
 
