@@ -1,0 +1,35 @@
+<html>
+<head>
+<script src="mode7.js"></script>
+</head>
+<body onload="loaded();">
+<input type="file" id="tilesetFilePicker">
+<br>
+<img crossOrigin="" id="tilemapImg" src="https://i.imgur.com/xJgGBHD.png" style="display: none;">
+<canvas id="tilemapCanvas" width="1024" height="1024" style="display:none;"></canvas>
+<textarea spellcheck="false" id="code" rows="20" cols="80" oninput="if(document.getElementById('rerenderLive').checked) rerender();">// Enter code in here
+// Use the variable "scanline" to get the current scanline
+// Use the function toFixed(n) to convert a floating point number
+m7a = 0x0100;
+m7b = 0x0000;
+m7c = 0x0000;
+m7d = 0x0100;
+m7x = 0;
+m7y = 0;
+m7hofs = 0;
+m7vofs = 0;
+return [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs];
+</textarea>
+<br>
+No errors?
+<input type="checkbox" id="sourceValid" name="sourceValid" disabled>
+-
+<input type="button" value="Redraw" onclick="rerender()">
+<label for="rerenderLive">Auto redraw:</label>
+<input type="checkbox" id="rerenderLive" name="rerenderLive" checked>
+<br>
+<canvas id="screen" width="256" height="224" style="border:1px solid #000000;"></canvas>
+<br>
+<span id="errorText"></span>
+</body>
+</html>
