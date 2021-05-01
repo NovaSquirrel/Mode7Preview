@@ -3,6 +3,12 @@ let animationEnabled = false;
 
 function clip(val) { return (val & 0x2000) ? (val | ~0x3ff) : (val & 0x3ff); }
 function toFixed(f) { return Math.round(f*256) & 0xffff};
+function signExtend16(v) {
+	if(v & 0x8000) {
+		return v | (-1 & ~0xffff);
+	}
+	return v;
+}
 
 function rerender() {
 	let sourceCode = document.getElementById('code').value;
@@ -43,6 +49,11 @@ function rerender() {
 			document.getElementById('errorText').textContent = err;
 			return;
 		}
+		m7a = signExtend16(m7a);
+		m7b = signExtend16(m7b);
+		m7c = signExtend16(m7c);
+		m7d = signExtend16(m7d);
+
 		// Based on Mesen-S's Ppu.cpp
 		let xValue = (
 			((m7a * clip(m7hofs - m7x)) & ~63) +
@@ -87,8 +98,8 @@ function rerender() {
 }
 
 function rerenderButton() {
+	animationStart = undefined;
 	rerender();
-	framecount = 0;
 }
 
 let animationStart;
