@@ -1,5 +1,42 @@
 <html>
 <head>
+<style>
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+</style>
 <title>Mode 7 Previewer</title>
 <script src="mode7.js"></script>
 </head>
@@ -8,9 +45,10 @@
 <br>
 <img crossOrigin="" id="tilemapImg" src="https://i.imgur.com/xJgGBHD.png" style="display: none;">
 <canvas id="tilemapCanvas" width="1024" height="1024" style="display:none;"></canvas>
-<textarea spellcheck="false" id="code" rows="20" cols="80" oninput="if(document.getElementById('rerenderLive').checked) rerender();">// Enter code in here
+<textarea spellcheck="false" id="code" rows="20" cols="80" oninput="rerenderIfLive();">// Enter code in here
 // Use the variable "scanline" to get the current scanline
 // Use the variable "framecount" to get a frame count, if animation is on
+// Use the variables "var1" and "var2" to get the numbers entered for "Variable 1" and "Variable 2"
 // Use the function toFixed(n) to convert a floating point number
 m7a = 0x0100;
 m7b = 0x0000;
@@ -23,18 +61,72 @@ m7vofs = 0;
 return [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs];
 </textarea>
 <br>
-No errors?
-<input type="checkbox" id="sourceValid" name="sourceValid" disabled>
--
-<input type="button" value="Redraw" onclick="rerenderButton()">
-<label for="rerenderLive">Auto redraw:</label>
-<input type="checkbox" id="rerenderLive" name="rerenderLive" checked>
-<label>
-Do animation:<input type="checkbox" id="doAnimation" name="doAnimation" onclick="animationToggled(this);">
-</label>
-<br>
-<canvas id="screen" width="256" height="224" style="border:1px solid #000000;"></canvas>
-<br>
+
+<div class="tab">
+  <button id="defaultOpen" class="tablinks" onclick="openTab(event, 'Preview')">Preview</button>
+  <button class="tablinks" onclick="openTab(event, 'Generate')">Generate</button>
+</div>
+
+<div id="Preview" class="tabcontent">
+	No errors?
+	<input type="checkbox" id="sourceValid" name="sourceValid" disabled>
+	-
+	<input type="button" value="Redraw" onclick="rerenderButton()">
+	<label for="rerenderLive">Auto redraw:</label>
+	<input type="checkbox" id="rerenderLive" name="rerenderLive" checked>
+	<label>
+	Do animation:<input type="checkbox" id="doAnimation" name="doAnimation" onclick="animationToggled(this);">
+	</label>
+
+	<br>
+	<canvas id="screen" width="256" height="224" style="border:1px solid #000000;"></canvas>
+	<br>
+	Variable 1: <input type="number" id="variable1" oninput="rerenderIfLive();" onchange="rerenderIfLive();" value="0">
+	<br>
+	Variable 2: <input type="number" id="variable2" oninput="rerenderIfLive();" onchange="rerenderIfLive();" value="0">
+
+</div>
+<div id="Generate" class="tabcontent">
+	Syntax: <button onclick="syntaxCa65();">ca65</button> <button onclick="syntaxAsar();">asar</button><br>
+	<table border="1">
+	<tr><td><input id="generateByte1" type="text" value=".byte "></td><td>byte data</td><td><input id="generateByte2" type="text" value=""></td></tr>
+	<tr><td><input id="generateWord1" type="text" value=".word "></td><td>word data</td><td><input id="generateWord2" type="text" value=""></td></tr>
+	<tr><td><input id="generateAddress1" type="text" value=".addr .loword("></td><td>address</td><td><input id="generateAddress2" type="text" value=")"></td></tr>
+	</table>
+	<hr>
+	Table name:
+	<input type="text" id="generateName" value="table">
+	<hr>
+	Loop variable 1
+	<input type="number" id="generate1Start" value="1">
+	to
+	<input type="number" id="generate1End" value="1">
+	with step
+	<input type="number" id="generate1Step" value="0">
+	<br>
+	Variable 2: <input type="number" id="generate2" value="0">
+	<hr>
+	Generate tables for:
+	<table border="1"><tr>
+	<td><label>M7A: <input type="checkbox" id="generateA" name="generateA" checked></label></td>
+	<td><label>M7B: <input type="checkbox" id="generateB" name="generateB" checked></label></td>
+	<td><label>M7C: <input type="checkbox" id="generateC" name="generateC" checked></label></td>
+	<td><label>M7D: <input type="checkbox" id="generateD" name="generateD" checked></label></td>
+	<td><label>M7X: <input type="checkbox" id="generateX" name="generateX"></label></td>
+	<td><label>M7Y: <input type="checkbox" id="generateY" name="generateY"></label></td>
+	<td><label>M7HOFS: <input type="checkbox" id="generateH" name="generateH"></label></td>
+	<td><label>M7VOFS: <input type="checkbox" id="generateV" name="generateV"></label></td>
+	<td><label>Pair A+B, X+Y, H+V: <input type="checkbox" id="generatePaired" name="generatePaired" checked></label></td>
+	<td><label>Pointer tables: <input type="checkbox" id="generatePointers" name="generatePointers" checked></label></td>
+	</tr></table>
+	<hr>
+	<button onclick="generateTables();">Generate</button><button onclick="copyToClipboard();">Copy to clipboard</button>
+	<br>
+	<textarea spellcheck="false" id="generateOutput"></textarea>
+</div>
 <span id="errorText"></span>
+
+
+
 </body>
 </html>
