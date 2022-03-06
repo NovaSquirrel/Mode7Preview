@@ -34,6 +34,23 @@ function signExtend16(v) {
 	return v;
 }
 
+// Drawing commands
+let drawingQueue = [];
+let canDraw = false;
+function ellipse(x, y, width, height, color, filled) {
+	if(canDraw)
+		drawingQueue.push(['E', x, y, width, height, color, filled]);
+}
+function rectangle(x, y, width, height, color, filled) {
+	if(canDraw)
+		drawingQueue.push(['R', x, y, width, height, color, filled]);
+}
+function line(x1, y1, x2, y2, color) {
+	if(canDraw)
+		drawingQueue.push(['L', x1, y1, x2, y2, color, false]);
+}
+
+
 function rerender() {
 	let sourceCode = document.getElementById('code').value;
 	let sourceValidSignal = document.getElementById('sourceValid');
@@ -73,6 +90,7 @@ function rerender() {
 	for(let drawY=0; drawY<224; drawY++) {
 		// Mode 7 registers
 		try {
+			canDraw = drawY == 223;
 			let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, variable1, variable2);
 		} catch(err) {
 			sourceValidSignal.checked = false;
@@ -123,6 +141,31 @@ function rerender() {
 	}
 
 	ctx.putImageData(outImage, 0, 0);
+
+	while(drawingQueue.length) {
+		let [type, drawX, drawY, width, height, color, filled] = drawingQueue.shift();
+
+		ctx.strokeStyle = color;
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		switch(type) {
+			case 'E':
+				ctx.ellipse(drawX, drawY, width, height, 0, 0, 2 * Math.PI);
+				break;
+			case 'R':
+				ctx.rect(drawX, drawY, width, height);
+				break;
+			case 'L':
+				ctx.moveTo(drawX, drawY);
+				ctx.lineTo(width, height);
+				break;
+		}
+		if(filled)
+			ctx.fill();
+		else
+			ctx.stroke();
+	}
+
 	if(animationEnabled && !animationWaiting) {
 		window.requestAnimationFrame(animationStep);
 		animationWaiting = true;
