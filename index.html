@@ -48,7 +48,7 @@
 <textarea spellcheck="false" id="code" rows="20" cols="80" oninput="rerenderIfLive();">// Enter code in here
 // Use the variable "scanline" to get the current scanline
 // Use the variable "framecount" to get a frame count, if animation is on
-// Use the variables "var1" and "var2" to get the numbers entered for "Variable 1" and "Variable 2"
+// Use the variables "var1", "var2", and "var3" to get the numbers entered for "Variable 1", "Variable 2", and "Variable 3"
 // Use the function toFixed(n) to convert a floating point number
 m7a = 0x0100;
 m7b = 0x0000;
@@ -84,6 +84,8 @@ return [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs];
 	Variable 1: <input type="number" id="variable1" oninput="rerenderIfLive();" onchange="rerenderIfLive();" value="0">
 	<br>
 	Variable 2: <input type="number" id="variable2" oninput="rerenderIfLive();" onchange="rerenderIfLive();" value="0">
+	<br>
+	Variable 3: <input type="number" id="variable3" oninput="rerenderIfLive();" onchange="rerenderIfLive();" value="0">
 
 </div>
 <div id="Generate" class="tabcontent">
@@ -104,7 +106,7 @@ return [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs];
 	with step
 	<input type="number" id="generate1Step" value="0">
 	<br>
-	Variable 2: <input type="number" id="generate2" value="0">
+	Variable 2: <input type="number" id="generate2" value="0">	Variable 3: <input type="number" id="generate3" value="0">
 	<hr>
 	Generate tables for:
 	<table border="1"><tr>

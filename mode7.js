@@ -65,11 +65,14 @@ function rerender() {
 	let variable2 = parseFloat(document.getElementById('variable2').value);
 	if(variable2 == NaN)
 		variable2 = 0;
+	let variable3 = parseFloat(document.getElementById('variable3').value);
+	if(variable3 == NaN)
+		variable3 = 0;
 
 	// Get the function ready to be called
 	let scanlineFunction;
 	try {
-		scanlineFunction = Function("scanline", "framecount", "var1", "var2", sourceCode);
+		scanlineFunction = Function("scanline", "framecount", "var1", "var2", "var3", sourceCode);
 		sourceValidSignal.checked = true;
 		document.getElementById('errorText').textContent = '';
 	} catch(err) {
@@ -91,7 +94,7 @@ function rerender() {
 		// Mode 7 registers
 		try {
 			canDraw = drawY == 223;
-			let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, variable1, variable2);
+			let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, variable1, variable2, variable3);
 		} catch(err) {
 			sourceValidSignal.checked = false;
 			console.log(err);
@@ -236,6 +239,9 @@ function generateTables() {
 	let variable2 = parseFloat(document.getElementById('generate2').value);
 	if(variable2 == NaN)
 		variable2 = 0;
+	let variable3 = parseFloat(document.getElementById('generate3').value);
+	if(variable3 == NaN)
+		variable3 = 0;
 
 	let generateByte1 = document.getElementById('generateByte1').value;
 	let generateByte2 = document.getElementById('generateByte2').value;
@@ -259,7 +265,7 @@ function generateTables() {
 	// Get the function ready to be called
 	let scanlineFunction;
 	try {
-		scanlineFunction = Function("scanline", "framecount", "var1", "var2", sourceCode);
+		scanlineFunction = Function("scanline", "framecount", "var1", "var2", "var3", sourceCode);
 		document.getElementById('errorText').textContent = '';
 	} catch(err) {
 		lastRunFailed = true;
@@ -285,7 +291,7 @@ function generateTables() {
 		
 		for(let drawY=0; drawY<224; drawY++) {
 			try {
-				let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, loopvar1, variable2);
+				let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, loopvar1, variable2, variable3);
 				m7a_array.push(m7a);
 				m7b_array.push(m7b);
 				m7c_array.push(m7c);
