@@ -301,7 +301,17 @@ function generateTables() {
 		
 		for(let drawY=0; drawY<224; drawY++) {
 			try {
-				let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, loopvar1, variable2, variable3);
+				let output = scanlineFunction(drawY, framecount, loopvar1, variable2, variable3);
+				if(output !== undefined) {
+					m7a = output[0];
+					m7b = output[1];
+					m7c = output[2];
+					m7d = output[3];
+					m7x = output[4];
+					m7y = output[5];
+					m7hofs = output[6];
+					m7vofs = output[7];
+				}
 				m7a_array.push(m7a);
 				m7b_array.push(m7b);
 				m7c_array.push(m7c);
