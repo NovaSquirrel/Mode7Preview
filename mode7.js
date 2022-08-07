@@ -94,7 +94,17 @@ function rerender() {
 		// Mode 7 registers
 		try {
 			canDraw = drawY == 223;
-			let [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs] = scanlineFunction(drawY, framecount, variable1, variable2, variable3);
+			let output = scanlineFunction(drawY, framecount, variable1, variable2, variable3);
+			if(output !== undefined) {
+				m7a = output[0];
+				m7b = output[1];
+				m7c = output[2];
+				m7d = output[3];
+				m7x = output[4];
+				m7y = output[5];
+				m7hofs = output[6];
+				m7vofs = output[7];
+			}
 		} catch(err) {
 			sourceValidSignal.checked = false;
 			console.log(err);
