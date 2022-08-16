@@ -111,6 +111,7 @@ function rerender() {
 		// Mode 7 registers
 		try {
 			if(frameObject) {
+				canDraw = false;
 				setRegistersIfArray(scanlineFunction(drawY, frameObject));
 			} else {
 				canDraw = drawY == 223;
@@ -119,6 +120,7 @@ function rerender() {
 
 				} else if(output !== undefined && Array.isArray(output) &&
 				  output.length == 2 && typeof(output[0]) == 'function' && typeof(output[1]) == 'function') {
+					canDraw = true;
 					frameObject = output[0](framecount, variable1, variable2, variable3);
 					scanlineFunction = output[1];
 					setRegistersIfArray(scanlineFunction(drawY, frameObject));
