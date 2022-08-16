@@ -50,6 +50,21 @@ function line(x1, y1, x2, y2, color) {
 		drawingQueue.push(['L', x1, y1, x2, y2, color, false]);
 }
 
+// Set all of the Mode 7 register globals if it's an array
+function setRegistersIfArray(output) {
+	if(output !== undefined && Array.isArray(output) && output.length == 8) {
+		m7a = output[0];
+		m7b = output[1];
+		m7c = output[2];
+		m7d = output[3];
+		m7x = output[4];
+		m7y = output[5];
+		m7hofs = output[6];
+		m7vofs = output[7];
+		return true;
+	}
+	return false;
+}
 
 function rerender() {
 	let sourceCode = document.getElementById('code').value;
@@ -82,6 +97,8 @@ function rerender() {
 		document.getElementById('errorText').textContent = err;
 		return;
 	}
+	// If not null, it's a per-frame per-scanline model
+	let frameObject = null;
 
 	// Set everything up
 	tilemapCtx.clearRect(0, 0, 1024, 1024);
@@ -93,17 +110,19 @@ function rerender() {
 	for(let drawY=0; drawY<224; drawY++) {
 		// Mode 7 registers
 		try {
-			canDraw = drawY == 223;
-			let output = scanlineFunction(drawY, framecount, variable1, variable2, variable3);
-			if(output !== undefined) {
-				m7a = output[0];
-				m7b = output[1];
-				m7c = output[2];
-				m7d = output[3];
-				m7x = output[4];
-				m7y = output[5];
-				m7hofs = output[6];
-				m7vofs = output[7];
+			if(frameObject) {
+				setRegistersIfArray(scanlineFunction(drawY, frameObject));
+			} else {
+				canDraw = drawY == 223;
+				let output = scanlineFunction(drawY, framecount, variable1, variable2, variable3);
+				if(setRegistersIfArray(output)) {
+
+				} else if(output !== undefined && Array.isArray(output) &&
+				  output.length == 2 && typeof(output[0]) == 'function' && typeof(output[1]) == 'function') {
+					frameObject = output[0](framecount, variable1, variable2, variable3);
+					scanlineFunction = output[1];
+					setRegistersIfArray(scanlineFunction(drawY, frameObject));
+				}
 			}
 		} catch(err) {
 			sourceValidSignal.checked = false;
