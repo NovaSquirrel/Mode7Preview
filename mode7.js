@@ -259,19 +259,19 @@ function syntaxAsar() {
 function generateTables() {
 	let sourceCode = document.getElementById('code').value;
 	let variable1 = parseFloat(document.getElementById('generate1Start').value);
-	if(variable1 == NaN)
+	if(Number.isNaN(variable1))
 		variable1 = 0;
 	let variable1End = parseFloat(document.getElementById('generate1End').value);
-	if(variable1End == NaN)
+	if(Number.isNaN(variable1End))
 		variable1End = 0;
 	let variable1Step = parseFloat(document.getElementById('generate1Step').value);
-	if(variable1Step == NaN)
+	if(Number.isNaN(variable1Step))
 		variable1Step = 0;
 	let variable2 = parseFloat(document.getElementById('generate2').value);
-	if(variable2 == NaN)
+	if(Number.isNaN(variable2))
 		variable2 = 0;
 	let variable3 = parseFloat(document.getElementById('generate3').value);
-	if(variable3 == NaN)
+	if(Number.isNaN(variable3))
 		variable3 = 0;
 
 	let generateByte1 = document.getElementById('generateByte1').value;
@@ -292,6 +292,13 @@ function generateTables() {
 	let generatePair = document.getElementById('generatePaired').checked;
 	let generatePointers = document.getElementById('generatePointers').checked;
 	let tableName = document.getElementById('generateName').value;
+	let rawTableMode = document.getElementById('generateRaw').checked;
+	let rawTableStart = parseInt(document.getElementById('rawTableStart').value);
+	if(Number.isNaN(rawTableStart))
+		rawTableStart = 0;
+	let rawTableEnd =  parseInt(document.getElementById('rawTableEnd').value);
+	if(Number.isNaN(rawTableEnd))
+		rawTableEnd = 223;
 
 	// Get the function ready to be called
 	let scanlineFunction;
@@ -373,28 +380,39 @@ function generateTables() {
 	function generateOneTable(do1, index1, name1, do2, index2, name2) {
 		if(do1 && !do2) { // First
 			pointersToMake.push(name1);
-			for(let i=0; i<loop_data.length; i++) {
-				output += tableName + '_' + name1 + ((loop_data.length != 1) ? ('_' + i) : '') + ':\n';
-				let data = loop_data[i][index1];
-				let previous = null;
-				let count = 0;
-				for(let scanline=0; scanline<data.length; scanline++) {
-					let value = sanitizeEntry(data[scanline]);
-
-					if(value != previous || count == 127) {
-						if(count != 0) {
-							output += indent + generateByte1 + count + generateByte2 + '\n';
-							output += indent + generateWord1 + previous + generateWord2 + '\n';
-						}
-						previous = value;
-						count = 1;
-					} else {
-						count++;
+			if(rawTableMode) {
+				for(let i=0; i<loop_data.length; i++) {
+					output += tableName + '_' + name1 + ((loop_data.length != 1) ? ('_' + i) : '') + ':\n';
+					let data = loop_data[i][index1];
+					for(let scanline=rawTableStart; scanline<=rawTableEnd && scanline<data.length; scanline++) {
+						let value = sanitizeEntry(data[scanline]);
+						output += indent + generateWord1 + value + generateWord2 + '\n';
 					}
 				}
-				output += indent + generateByte1 + count + generateByte2 + '\n';
-				output += indent + generateWord1 + previous + generateWord2 + '\n';
-				output += indent + generateByte1 + '0' + generateByte2 + '\n';
+			} else {
+				for(let i=0; i<loop_data.length; i++) {
+					output += tableName + '_' + name1 + ((loop_data.length != 1) ? ('_' + i) : '') + ':\n';
+					let data = loop_data[i][index1];
+					let previous = null;
+					let count = 0;
+					for(let scanline=0; scanline<data.length; scanline++) {
+						let value = sanitizeEntry(data[scanline]);
+
+						if(value != previous || count == 127) {
+							if(count != 0) {
+								output += indent + generateByte1 + count + generateByte2 + '\n';
+								output += indent + generateWord1 + previous + generateWord2 + '\n';
+							}
+							previous = value;
+							count = 1;
+						} else {
+							count++;
+						}
+					}
+					output += indent + generateByte1 + count + generateByte2 + '\n';
+					output += indent + generateWord1 + previous + generateWord2 + '\n';
+					output += indent + generateByte1 + '0' + generateByte2 + '\n';
+				}
 			}
 		}
 		else if(!do1 && do2) { // Second
@@ -409,27 +427,37 @@ function generateTables() {
 				let previous1 = null;
 				let previous2 = null;
 				let count = 0;
-				for(let scanline=0; scanline<data1.length; scanline++) {
-					let value1 = sanitizeEntry(data1[scanline]);
-					let value2 = sanitizeEntry(data2[scanline]);
+				if(rawTableMode) {
+					for(let scanline=rawTableStart; scanline<data1.length && scanline<=rawTableEnd; scanline++) {
+						let value1 = sanitizeEntry(data1[scanline]);
+						let value2 = sanitizeEntry(data2[scanline]);
 
-					if(value1 != previous1 || value2 != previous2 || count == 127) {
-						if(count != 0) {
-							output += indent + generateByte1 + count + generateByte2 + '\n';
-							output += indent + generateWord1 + previous1 + generateWord2 + '\n';
-							output += indent + generateWord1 + previous2 + generateWord2 + '\n';
-						}
-						previous1 = value1;
-						previous2 = value2;
-						count = 1;
-					} else {
-						count++;
+						output += indent + generateWord1 + value1 + generateWord2 + '\n';
+						output += indent + generateWord1 + value2 + generateWord2 + '\n';
 					}
+				} else {
+					for(let scanline=0; scanline<data1.length; scanline++) {
+						let value1 = sanitizeEntry(data1[scanline]);
+						let value2 = sanitizeEntry(data2[scanline]);
+
+						if(value1 != previous1 || value2 != previous2 || count == 127) {
+							if(count != 0) {
+								output += indent + generateByte1 + count + generateByte2 + '\n';
+								output += indent + generateWord1 + previous1 + generateWord2 + '\n';
+								output += indent + generateWord1 + previous2 + generateWord2 + '\n';
+							}
+							previous1 = value1;
+							previous2 = value2;
+							count = 1;
+						} else {
+							count++;
+						}
+					}
+					output += indent + generateByte1 + count + generateByte2 + '\n';
+					output += indent + generateWord1 + previous1 + generateWord2 + '\n';
+					output += indent + generateWord1 + previous2 + generateWord2 + '\n';
+					output += indent + generateByte1 + '0' + generateByte2 + '\n';
 				}
-				output += indent + generateByte1 + count + generateByte2 + '\n';
-				output += indent + generateWord1 + previous1 + generateWord2 + '\n';
-				output += indent + generateWord1 + previous2 + generateWord2 + '\n';
-				output += indent + generateByte1 + '0' + generateByte2 + '\n';
 			}
 		}
 	}

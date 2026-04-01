@@ -122,6 +122,7 @@ return [m7a, m7b, m7c, m7d, m7x, m7y, m7hofs, m7vofs];
 	<td><label>Pair A+B, X+Y, H+V: <input type="checkbox" id="generatePaired" name="generatePaired" checked></label></td>
 	<td><label>Pointer tables: <input type="checkbox" id="generatePointers" name="generatePointers" checked></label></td>
 	</tr></table>
+	<label>Raw register values <input type="checkbox" id="generateRaw"></label> (for indirect HDMA) - Scanline range: <input type="number" id="rawTableStart" placeholder="0" size="3"> to <input type="number" id="rawTableEnd" placeholder="223" size="3">
 	<hr>
 	<button onclick="generateTables();">Generate</button><button onclick="copyToClipboard();">Copy to clipboard</button>
 	<br>
