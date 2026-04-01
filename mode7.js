@@ -75,13 +75,13 @@ function rerender() {
 	let tilemapCtx = tilemapCanvas.getContext('2d', { alpha: false });
 
 	let variable1 = parseFloat(document.getElementById('variable1').value);
-	if(variable1 == NaN)
+	if(Number.isNaN(variable1))
 		variable1 = 0;
 	let variable2 = parseFloat(document.getElementById('variable2').value);
-	if(variable2 == NaN)
+	if(Number.isNaN(variable2))
 		variable2 = 0;
 	let variable3 = parseFloat(document.getElementById('variable3').value);
-	if(variable3 == NaN)
+	if(Number.isNaN(variable3))
 		variable3 = 0;
 
 	// Get the function ready to be called
